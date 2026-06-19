@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Финмодель «Русь 2026» — дизайн-система
+   Корпоративный финансовый стиль: глубокий navy + 7 цветов вкладок.
+   Все цвета в HSL.
+*/
+
+@layer base {
+  :root {
+    /* Solar Flare — тёплый editorial с оранжевым/коралл/индиго */
+    --background: 33 100% 96%;
+    --foreground: 240 50% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 50% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 50% 14%;
+
+    --primary: 22 95% 55%;               /* оранжевый */
+    --primary-foreground: 33 100% 98%;
+
+    --secondary: 30 60% 92%;
+    --secondary-foreground: 240 50% 18%;
+
+    --muted: 30 50% 94%;
+    --muted-foreground: 240 15% 40%;
+
+    --accent: 245 75% 58%;               /* индиго */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 158 70% 38%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 95% 55%;
+    --warning-foreground: 240 50% 14%;
+
+    --border: 30 40% 86%;
+    --input: 30 40% 90%;
+    --ring: 22 95% 55%;
+
+    --radius: 0.875rem;
+
+    /* 7 цветов вкладок — Solar Flare */
+    --tab-dashboard: 245 75% 58%;        /* индиго */
+    --tab-dashboard-soft: 245 90% 95%;
+    --tab-milk: 200 85% 50%;             /* небесно-синий */
+    --tab-milk-soft: 200 90% 94%;
+    --tab-meat: 0 84% 60%;               /* красный */
+    --tab-meat-soft: 0 90% 95%;
+    --tab-other: 22 95% 55%;             /* оранжевый */
+    --tab-other-soft: 22 95% 94%;
+    --tab-monthly: 280 70% 55%;          /* фиолетовый */
+    --tab-monthly-soft: 280 80% 95%;
+    --tab-compare: 330 80% 58%;          /* малиновый */
+    --tab-compare-soft: 330 85% 95%;
+    --tab-logic: 240 20% 40%;            /* графит */
+    --tab-logic-soft: 240 20% 92%;
+
+    /* Финансовые сигналы */
+    --positive: 158 70% 40%;
+    --negative: 0 84% 58%;
+
+    /* Solar Flare gradients & glow */
+    --gradient-aurora: linear-gradient(135deg, hsl(22 95% 55%), hsl(0 84% 60%), hsl(245 75% 58%));
+    --gradient-surface: linear-gradient(135deg, hsl(0 0% 100% / 0.95), hsl(33 100% 98% / 0.85));
+    --glow-mint: 0 0 32px hsl(22 95% 55% / 0.30);
+    --glow-lavender: 0 0 32px hsl(245 75% 58% / 0.30);
+    --shadow-glass: 0 10px 30px -10px hsl(22 60% 30% / 0.18), 0 4px 12px -4px hsl(240 30% 20% / 0.08);
+
+    --sidebar-background: 240 50% 14%;
+    --sidebar-foreground: 33 50% 92%;
+    --sidebar-primary: 22 95% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 40% 22%;
+    --sidebar-accent-foreground: 33 50% 95%;
+    --sidebar-border: 240 30% 28%;
+    --sidebar-ring: 22 95% 55%;
+  }
+
+  .dark {
+    --background: 222 47% 8%;
+    --foreground: 220 15% 92%;
+    --card: 222 47% 11%;
+    --card-foreground: 220 15% 92%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 220 15% 92%;
+    --primary: 215 80% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 40% 18%;
+    --secondary-foreground: 220 15% 92%;
+    --muted: 222 40% 18%;
+    --muted-foreground: 220 10% 65%;
+    --accent: 222 40% 18%;
+    --accent-foreground: 220 15% 92%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 220 15% 95%;
+    --border: 222 40% 22%;
+    --input: 222 40% 22%;
+    --ring: 215 80% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "tnum" 1, "ss01" 1, "cv11" 1;
+    font-family: 'Fira Sans', system-ui, -apple-system, sans-serif;
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(ellipse 75% 50% at 10% 0%, hsl(22 95% 60% / 0.28), transparent 60%),
+      radial-gradient(ellipse 65% 45% at 90% 5%, hsl(0 84% 65% / 0.22), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 50% 100%, hsl(245 75% 60% / 0.18), transparent 65%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  h1, h2, h3 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    letter-spacing: -0.015em;
+    font-weight: 400;
+  }
+  h4, h5 {
+    font-family: 'Fira Sans', system-ui, sans-serif;
+    letter-spacing: -0.01em;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+}
+
+@layer components {
+  .glass {
+    background: linear-gradient(135deg, hsl(0 0% 100% / 0.92), hsl(33 100% 98% / 0.80));
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid hsl(30 40% 80% / 0.50);
+    box-shadow: var(--shadow-glass);
+  }
+  .glass-strong {
+    background: linear-gradient(135deg, hsl(0 0% 100% / 0.96), hsl(33 100% 98% / 0.90));
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid hsl(30 40% 78% / 0.55);
+    box-shadow: var(--shadow-glass);
+  }
+  .glow-mint { box-shadow: var(--glow-mint); }
+  .glow-lavender { box-shadow: var(--glow-lavender); }
+  .text-aurora {
+    background: var(--gradient-aurora);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-style: italic;
+  }
+}
