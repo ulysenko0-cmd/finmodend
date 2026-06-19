@@ -1,9 +1,6 @@
 #!/bin/bash
-cd "/c/Users/1/Desktop/Работа Клод/Финмодель Русь интерактив"
-rm -f .git
-git init
+git config --global user.email "javanova1996@gmail.com"
+git config --global user.name "Yulia"
 git add .
-git commit -m "init"
-git remote add origin https://github.com/ulysenko0-cmd/rusfinmod.git
-git branch -M main
+git commit -m "update invest values"
 git push -u origin main
