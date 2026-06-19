@@ -145,7 +145,7 @@ const DEFAULT_STATE = {
     crops_loss: 12_000_000,
     other: 4_200_000,
   },
-  inflation_other_coeff: 1.05,
+  inflation_other_coeff: 1.065,
   oxr_2025: 31_461_778.71,
   invest_1_fixed_assets: 70_000_000,
   invest_2_young_cattle: 50_000_000,
