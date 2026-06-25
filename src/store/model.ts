@@ -129,7 +129,7 @@ const DEFAULT_STATE = {
   cost_milk_2025: 38.55,
   cost_milk_coeff: 1.065,
   meat: structuredClone(DEFAULT_MEAT),
-  revenue_meat_coeff: 1.065,
+  revenue_meat_coeff: 1.05,
   cost_meat_coeff: 1.065,
   subsidies_2026_total: 105_000_000,
   other_revenue_items: {
