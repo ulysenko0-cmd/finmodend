@@ -14,7 +14,7 @@ export function MilkTab() {
       {/* KPI */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <KpiCard title="Годовой объём молока" value={fmtKg(c.total_volume_kg) + " кг"} icon={<Calendar size={26}/>} accent="milk"/>
-        <KpiCard title="Выручка молока" value={fmtMln(c.revenue_milk_total)} icon={<Coins size={26}/>} accent="milk"/>
+        <KpiCard title="Выручка молока" value={fmtMln(c.revenue_milk_total)} subtitle={`в т.ч. надбавка за жир: ${fmtMln(c.fat_premium_total)}`} icon={<Coins size={26}/>} accent="milk"/>
         <KpiCard title="СС молока 2026 (всего)" value={fmtMln(c.cost_milk_total)} subtitle={`${fmtPerKg(c.cost_milk_2026)} ₽/кг × ${fmtKg(c.total_volume_kg)} кг`} icon={<Milk size={26}/>} accent="milk"/>
       </div>
 
@@ -25,7 +25,10 @@ export function MilkTab() {
             <thead className="text-xs uppercase tracking-wider text-muted-foreground">
               <tr className="border-b">
                 <th className="py-2 text-left font-medium">Месяц</th>
-                <th className="py-2 text-center font-medium w-32">Цена, ₽/кг</th>
+                <th className="py-2 text-center font-medium w-28">База, ₽/кг</th>
+                <th className="py-2 text-center font-medium w-24">Жир, %</th>
+                <th className="py-2 text-right font-medium w-24">Надбавка</th>
+                <th className="py-2 text-right font-medium w-24">Цена итог</th>
                 <th className="py-2 text-center font-medium w-36">Среднедн., кг/день</th>
                 <th className="py-2 text-right font-medium">Дней</th>
                 <th className="py-2 text-right font-medium">Объём, кг</th>
@@ -36,10 +39,9 @@ export function MilkTab() {
             </thead>
             <tbody className="num">
               {MONTHS.map((m, i) => {
-                const v = s.daily_volume_m[i] * DAYS_IN_MONTH[i];
-                const rev = s.price_milk_m[i] * v;
-                const costMilk = c.cost_milk_2026 * v;
-                const resultMilk = rev - costMilk;
+                const mc = c.monthly[i];
+                const costMilk = c.cost_milk_2026 * mc.volume;
+                const resultMilk = mc.revenue_milk - costMilk;
                 return (
                   <tr key={m} className="border-b border-border/50">
                     <td className="py-1.5 font-medium">{m}</td>
@@ -47,19 +49,27 @@ export function MilkTab() {
                       <NumberField value={s.price_milk_m[i]} onChange={(x) => s.setPriceMilk(i, x)} step={0.5} suffix="₽"/>
                     </td>
                     <td className="py-1.5 px-2">
+                      <NumberField value={s.fat_m[i]} onChange={(x) => s.setFat(i, x)} step={0.1} suffix="%"/>
+                    </td>
+                    <td className="py-1.5 text-right text-emerald-600 font-medium">
+                      {mc.fat_premium > 0 ? `+${mc.fat_premium.toFixed(2)}` : "—"}
+                    </td>
+                    <td className="py-1.5 text-right font-semibold">{mc.effective_price.toFixed(2)}</td>
+                    <td className="py-1.5 px-2">
                       <NumberField value={s.daily_volume_m[i]} onChange={(x) => s.setDailyVolume(i, x)} step={100} suffix="кг"/>
                     </td>
                     <td className="py-1.5 text-right text-muted-foreground">{DAYS_IN_MONTH[i]}</td>
-                    <td className="py-1.5 text-right">{fmtKg(v)}</td>
-                    <td className="py-1.5 text-right font-medium">{fmtRub(rev)}</td>
+                    <td className="py-1.5 text-right">{fmtKg(mc.volume)}</td>
+                    <td className="py-1.5 text-right font-medium">{fmtRub(mc.revenue_milk)}</td>
                     <td className="py-1.5 text-right">{fmtRub(costMilk)}</td>
                     <td className={`py-1.5 text-right font-medium ${resultMilk >= 0 ? "text-emerald-600" : "text-rose-600"}`}>{fmtRub(resultMilk)}</td>
                   </tr>
                 );
               })}
               <tr className="border-t-2 border-foreground/30 font-bold bg-tab-milk-soft/40">
-                <td className="py-3" colSpan={4}>ИТОГО за год</td>
-                <td className="py-3 text-right">{fmtKg(c.total_volume_kg)}</td>
+                <td className="py-3" colSpan={3}>ИТОГО за год</td>
+                <td className="py-3 text-right text-emerald-600">+{fmtRub(c.fat_premium_total)}</td>
+                <td className="py-3 text-right" colSpan={4}>{fmtKg(c.total_volume_kg)} кг</td>
                 <td className="py-3 text-right">{fmtRub(c.revenue_milk_total)}</td>
                 <td className="py-3 text-right">{fmtRub(c.cost_milk_total)}</td>
                 <td className={`py-3 text-right ${c.revenue_milk_total - c.cost_milk_total >= 0 ? "text-emerald-600" : "text-rose-600"}`}>{fmtRub(c.revenue_milk_total - c.cost_milk_total)}</td>

@@ -33,8 +33,11 @@ export interface MeatRow {
 
 export interface ModelState {
   // Молоко: помесячно
-  price_milk_m: number[];        // 12 месяцев
+  price_milk_m: number[];        // 12 месяцев — базовая цена
   daily_volume_m: number[];      // 12 месяцев
+  fat_m: number[];               // 12 месяцев — жир, %
+  fat_base: number;              // база надбавки по договору (3.6%)
+  fat_premium_per_pct: number;   // ₽/кг за 1% жира сверх базы (2.0)
 
   // СС молока
   cost_milk_2025: number;
@@ -100,13 +103,14 @@ export interface ModelState {
   // Setters
   setPriceMilk: (i: number, v: number) => void;
   setDailyVolume: (i: number, v: number) => void;
+  setFat: (i: number, v: number) => void;
   setField: <K extends keyof ModelState>(k: K, v: ModelState[K]) => void;
   setMeatField: (cat: MeatKey, field: keyof MeatRow, v: number) => void;
   reset: () => void;
 }
 
 // --- Дефолтные значения из спецификации ---
-const DEFAULT_PRICE_MILK = [41.5, 39, 37, 37, 37, 36, 36, 36, 36, 36, 36, 36];
+const DEFAULT_PRICE_MILK = [41.5, 39, 37, 37, 37, 35.63, 35, 35, 35, 35, 35, 35];
 const DEFAULT_DAILY_VOLUME = [
   93761.129, 95282.857, 96367.742, 96800, 103800, 96400,
   96400, 96400, 96400, 96400, 96400, 96400,
@@ -123,15 +127,20 @@ const DEFAULT_MEAT: Record<MeatKey, MeatRow> = {
   heifers:       { heads: 544,    weight_per_head: 567.791176,   price_2025: 357.3581, cost_2025: 369.7174 },
 };
 
+const DEFAULT_FAT = [4.12, 3.97, 3.90, 3.95, 3.77, 3.69, 3.64, 3.61, 3.56, 3.73, 3.83, 4.02];
+
 const DEFAULT_STATE = {
   price_milk_m: [...DEFAULT_PRICE_MILK],
   daily_volume_m: [...DEFAULT_DAILY_VOLUME],
+  fat_m: [...DEFAULT_FAT],
+  fat_base: 3.6,
+  fat_premium_per_pct: 2.0,
   cost_milk_2025: 38.55,
   cost_milk_coeff: 1.065,
   meat: structuredClone(DEFAULT_MEAT),
   revenue_meat_coeff: 1.05,
   cost_meat_coeff: 1.065,
-  subsidies_2026_total: 105_000_000,
+  subsidies_2026_total: 126_000_000,
   other_revenue_items: {
     sale_os: 10_780_000,
     insurance: 12_000_000,
@@ -179,6 +188,9 @@ export const useModel = create<ModelState>((set) => ({
   setDailyVolume: (i, v) => set((s) => {
     const arr = [...s.daily_volume_m]; arr[i] = v; return { daily_volume_m: arr };
   }),
+  setFat: (i, v) => set((s) => {
+    const arr = [...s.fat_m]; arr[i] = v; return { fat_m: arr };
+  }),
   setField: (k, v) => set({ [k]: v } as Partial<ModelState>),
   setMeatField: (cat, field, v) => set((s) => ({
     meat: { ...s.meat, [cat]: { ...s.meat[cat], [field]: v } },
@@ -191,7 +203,10 @@ export const useModel = create<ModelState>((set) => ({
 export interface MonthlyCalc {
   month: string;
   days: number;
-  price: number;
+  price: number;            // базовая цена
+  fat: number;              // жир, %
+  fat_premium: number;      // надбавка ₽/кг
+  effective_price: number;  // цена с надбавкой
   daily: number;
   volume: number;
   revenue_milk: number;
@@ -222,6 +237,7 @@ export interface Calculations {
   monthly: MonthlyCalc[];
   total_volume_kg: number;
   revenue_milk_total: number;
+  fat_premium_total: number;  // суммарная надбавка за жир за год, ₽
 
   // СС молока
   cost_milk_2026: number;
@@ -261,16 +277,20 @@ export interface Calculations {
 }
 
 export function calculate(s: ModelState): Calculations {
-  // Помесячно — объёмы
+  // Помесячно — объёмы + надбавка за жир
   const monthlyBase = s.price_milk_m.map((price, i) => {
     const days = DAYS_IN_MONTH[i];
     const daily = s.daily_volume_m[i];
     const volume = daily * days;
-    const revenue_milk = price * volume;
-    return { i, price, daily, days, volume, revenue_milk };
+    const fat = s.fat_m[i];
+    const fat_premium = Math.max(0, (fat - s.fat_base) * s.fat_premium_per_pct);
+    const effective_price = price + fat_premium;
+    const revenue_milk = effective_price * volume;
+    return { i, price, fat, fat_premium, effective_price, daily, days, volume, revenue_milk };
   });
   const total_volume_kg = monthlyBase.reduce((a, m) => a + m.volume, 0);
   const revenue_milk_total = monthlyBase.reduce((a, m) => a + m.revenue_milk, 0);
+  const fat_premium_total = monthlyBase.reduce((a, m) => a + m.fat_premium * m.volume, 0);
 
   // СС молока
   const cost_milk_2026 = s.cost_milk_2025 * s.cost_milk_coeff;
@@ -323,13 +343,16 @@ export function calculate(s: ModelState): Calculations {
 
   // Помесячный расчёт — выручка/СС на 1 кг (мясо, субсидии, прочие — константы /кг)
   const monthly: MonthlyCalc[] = monthlyBase.map((m) => {
-    const revenue_per_kg = m.price + revenue_meat_per_kg + subsidies_per_kg + other_revenue_per_kg;
+    const revenue_per_kg = m.effective_price + revenue_meat_per_kg + subsidies_per_kg + other_revenue_per_kg;
     const cost_per_kg = cost_milk_2026 + cost_meat_per_kg + other_costs_2026 + oxr_per_kg;
     const margin_per_kg = revenue_per_kg - cost_per_kg;
     return {
       month: MONTHS[m.i],
       days: m.days,
       price: m.price,
+      fat: m.fat,
+      fat_premium: m.fat_premium,
+      effective_price: m.effective_price,
       daily: m.daily,
       volume: m.volume,
       revenue_milk: m.revenue_milk,
@@ -379,6 +402,7 @@ export function calculate(s: ModelState): Calculations {
     monthly,
     total_volume_kg,
     revenue_milk_total,
+    fat_premium_total,
     cost_milk_2026,
     cost_milk_total,
     meatRows,
