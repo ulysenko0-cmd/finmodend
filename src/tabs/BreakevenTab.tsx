@@ -14,7 +14,7 @@ export function BreakevenTab() {
 
   // Все затраты на 1 кг молока
   const total_cost_per_kg =
-    c.cost_milk_2026 + c.cost_meat_per_kg + c.other_costs_2026 + c.oxr_per_kg;
+    c.cost_milk_per_kg_realized + c.cost_meat_per_kg + c.other_costs_2026 + c.oxr_per_kg;
 
   // Точка безубыточности по результату производства (result = 0)
   const breakeven_price = total_cost_per_kg - extras_revenue_per_kg;
@@ -74,7 +74,7 @@ export function BreakevenTab() {
               <tr className="border-b border-border/50">
                 <td className="py-2 font-medium">СС молока 2026</td>
                 <td className="py-2 text-right">{fmtRub(c.cost_milk_total)}</td>
-                <td className="py-2 text-right">{fmtPerKg(c.cost_milk_2026)}</td>
+                <td className="py-2 text-right">{fmtPerKg(c.cost_milk_per_kg_realized)}</td>
               </tr>
               <tr className="border-b border-border/50">
                 <td className="py-2 font-medium">СС мяса</td>

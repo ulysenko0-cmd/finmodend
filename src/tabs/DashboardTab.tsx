@@ -29,7 +29,8 @@ export function DashboardTab() {
   const periodMeatResult = periodMeatRevenue - periodMeatCost;
   const periodSubsidies = c.subsidies_per_kg * periodVolume;
   const periodOtherRevenue = c.other_revenue_per_kg * periodVolume;
-  const periodCostMilk = c.cost_milk_2026 * periodVolume;
+  const periodCostMilk = selectedMonth ? selectedMonth.milk_cost_total : c.cost_milk_total;
+  const periodCostMilkPerKg = periodVolume > 0 ? periodCostMilk / periodVolume : 0;
   const periodOtherCosts = c.other_costs_2026 * periodVolume;
   const periodOxr = c.oxr_2026 * share;
 
@@ -146,7 +147,7 @@ export function DashboardTab() {
               </tr>
             </thead>
             <tbody className="num">
-              <Row label="СС молока 2026" perKg={c.cost_milk_2026} accent="bg-tab-milk" />
+              <Row label="СС молока 2026 / кг реализации" perKg={periodCostMilkPerKg} accent="bg-tab-milk" />
               <Row label="СС мяса/кг молока" perKg={c.cost_meat_per_kg} accent="bg-tab-meat" />
               <Row label="Прочие расходы 2026" perKg={c.other_costs_2026} accent="bg-tab-other" />
               <Row label="Общехозяйственные расходы 2026" perKg={c.oxr_per_kg} accent="bg-tab-other" />

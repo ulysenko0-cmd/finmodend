@@ -40,7 +40,10 @@ export interface ModelState {
   fat_premium_per_pct: number;   // ₽/кг за 1% жира сверх базы (2.0)
 
   // СС молока
-  cost_milk_2025: number;
+  milk_marketability_pct: number;       // товарность: реализация / надой, %
+  milk_herd_heads: number;              // постоянное среднегодовое поголовье
+  feed_cost_milk_2025_total: number;    // корма — переменная часть, ₽/год
+  fixed_cost_milk_2025_total: number;   // остальные затраты — постоянная часть, ₽/год
   cost_milk_coeff: number;
 
   // Мясо
@@ -90,8 +93,10 @@ export interface ModelState {
   // Сравнение — факт 2025 (для моста)
   fact_2025: {
     volume_kg: number;
+    production_volume_kg: number;
     price_milk: number;          // средняя руб/кг
     cost_milk: number;           // руб/кг
+    cost_milk_total: number;
     revenue_meat_total: number;
     cost_meat_total: number;
     subsidies: number;
@@ -128,6 +133,7 @@ const DEFAULT_MEAT: Record<MeatKey, MeatRow> = {
 };
 
 const DEFAULT_FAT = [4.12, 3.97, 3.90, 3.95, 3.77, 3.69, 3.64, 3.61, 3.56, 3.73, 3.83, 4.02];
+const BASE_MILK_HERD_2025 = 3_689;
 
 const DEFAULT_STATE = {
   price_milk_m: [...DEFAULT_PRICE_MILK],
@@ -135,7 +141,10 @@ const DEFAULT_STATE = {
   fat_m: [...DEFAULT_FAT],
   fat_base: 3.6,
   fat_premium_per_pct: 2.0,
-  cost_milk_2025: 38.55,
+  milk_marketability_pct: 97.5,
+  milk_herd_heads: 3_689,
+  feed_cost_milk_2025_total: 710_819_831.81,
+  fixed_cost_milk_2025_total: 728_079_666.76,
   cost_milk_coeff: 1.065,
   meat: structuredClone(DEFAULT_MEAT),
   revenue_meat_coeff: 1.05,
@@ -169,8 +178,10 @@ const DEFAULT_STATE = {
   invest_2_source: "calc" as const,
   fact_2025: {
     volume_kg: 35_555_149,
+    production_volume_kg: 36_711_107,
     price_milk: 44.52,                // 1 582 915 233.48 / 35 555 149
     cost_milk: 38.55,
+    cost_milk_total: 1_438_899_498.57, // лист «Молоко СС»
     revenue_meat_total: 241_303_517.47,
     cost_meat_total: 305_898_295.84,  // лист «Сравнение»: мясо + племпродажа СС
     subsidies: 125_003_628.55,
@@ -208,8 +219,13 @@ export interface MonthlyCalc {
   fat_premium: number;      // надбавка ₽/кг
   effective_price: number;  // цена с надбавкой
   daily: number;
-  volume: number;
+  volume: number;            // реализация, кг
+  production_volume: number; // фактический надой, кг
   revenue_milk: number;
+  feed_cost: number;
+  fixed_milk_cost: number;
+  milk_cost_total: number;
+  milk_cost_per_kg: number;   // производственная СС на 1 кг надоя
   revenue_per_kg: number;
   cost_per_kg: number;
   margin_per_kg: number;
@@ -235,13 +251,17 @@ export interface MeatCalc {
 export interface Calculations {
   // Молоко помесячно
   monthly: MonthlyCalc[];
-  total_volume_kg: number;
+  total_volume_kg: number;       // реализация, кг
+  total_production_kg: number;   // фактический надой, кг
   revenue_milk_total: number;
   fat_premium_total: number;  // суммарная надбавка за жир за год, ₽
 
   // СС молока
-  cost_milk_2026: number;
+  cost_milk_2026: number;                // ₽/кг фактического надоя
+  cost_milk_per_kg_realized: number;     // ₽/кг реализации для сводного результата
   cost_milk_total: number;
+  feed_cost_milk_2026_total: number;
+  fixed_cost_milk_2026_total: number;
 
   // Мясо
   meatRows: MeatCalc[];
@@ -277,24 +297,34 @@ export interface Calculations {
 }
 
 export function calculate(s: ModelState): Calculations {
-  // Помесячно — объёмы + надбавка за жир
+  // Помесячно — реализация, фактический надой и надбавка за жир.
+  // Товарность = реализация / надой.
+  const marketability = Math.max(0, Math.min(1, s.milk_marketability_pct / 100));
   const monthlyBase = s.price_milk_m.map((price, i) => {
     const days = DAYS_IN_MONTH[i];
     const daily = s.daily_volume_m[i];
     const volume = daily * days;
+    const production_volume = marketability > 0 ? volume / marketability : 0;
     const fat = s.fat_m[i];
     const fat_premium = Math.max(0, (fat - s.fat_base) * s.fat_premium_per_pct);
     const effective_price = price + fat_premium;
     const revenue_milk = effective_price * volume;
-    return { i, price, fat, fat_premium, effective_price, daily, days, volume, revenue_milk };
+    return { i, price, fat, fat_premium, effective_price, daily, days, volume, production_volume, revenue_milk };
   });
   const total_volume_kg = monthlyBase.reduce((a, m) => a + m.volume, 0);
+  const total_production_kg = monthlyBase.reduce((a, m) => a + m.production_volume, 0);
   const revenue_milk_total = monthlyBase.reduce((a, m) => a + m.revenue_milk, 0);
   const fat_premium_total = monthlyBase.reduce((a, m) => a + m.fat_premium * m.volume, 0);
 
-  // СС молока
-  const cost_milk_2026 = s.cost_milk_2025 * s.cost_milk_coeff;
-  const cost_milk_total = cost_milk_2026 * total_volume_kg;
+  // СС молока: корма на 100% зависят от поголовья, остальные затраты постоянны.
+  // При постоянном стаде обе годовые суммы распределяются по календарным дням,
+  // а удой влияет на себестоимость 1 кг через знаменатель.
+  const herdFactor = BASE_MILK_HERD_2025 > 0 ? s.milk_herd_heads / BASE_MILK_HERD_2025 : 0;
+  const feed_cost_milk_2026_total = s.feed_cost_milk_2025_total * s.cost_milk_coeff * herdFactor;
+  const fixed_cost_milk_2026_total = s.fixed_cost_milk_2025_total * s.cost_milk_coeff;
+  const cost_milk_total = feed_cost_milk_2026_total + fixed_cost_milk_2026_total;
+  const cost_milk_2026 = total_production_kg > 0 ? cost_milk_total / total_production_kg : 0;
+  const cost_milk_per_kg_realized = total_volume_kg > 0 ? cost_milk_total / total_volume_kg : 0;
 
   // Мясо — по категориям. Логика: голов × вес/гол = объём кг → × цена/СС
   const meatRows: MeatCalc[] = MEAT_CATEGORIES.map((cat) => {
@@ -343,8 +373,14 @@ export function calculate(s: ModelState): Calculations {
 
   // Помесячный расчёт — выручка/СС на 1 кг (мясо, субсидии, прочие — константы /кг)
   const monthly: MonthlyCalc[] = monthlyBase.map((m) => {
+    const calendarShare = m.days / 365;
+    const feed_cost = feed_cost_milk_2026_total * calendarShare;
+    const fixed_milk_cost = fixed_cost_milk_2026_total * calendarShare;
+    const milk_cost_total = feed_cost + fixed_milk_cost;
+    const milk_cost_per_kg = m.production_volume > 0 ? milk_cost_total / m.production_volume : 0;
+    const milk_cost_per_kg_realized = m.volume > 0 ? milk_cost_total / m.volume : 0;
     const revenue_per_kg = m.effective_price + revenue_meat_per_kg + subsidies_per_kg + other_revenue_per_kg;
-    const cost_per_kg = cost_milk_2026 + cost_meat_per_kg + other_costs_2026 + oxr_per_kg;
+    const cost_per_kg = milk_cost_per_kg_realized + cost_meat_per_kg + other_costs_2026 + oxr_per_kg;
     const margin_per_kg = revenue_per_kg - cost_per_kg;
     return {
       month: MONTHS[m.i],
@@ -355,7 +391,12 @@ export function calculate(s: ModelState): Calculations {
       effective_price: m.effective_price,
       daily: m.daily,
       volume: m.volume,
+      production_volume: m.production_volume,
       revenue_milk: m.revenue_milk,
+      feed_cost,
+      fixed_milk_cost,
+      milk_cost_total,
+      milk_cost_per_kg,
       revenue_per_kg,
       cost_per_kg,
       margin_per_kg,
@@ -390,7 +431,7 @@ export function calculate(s: ModelState): Calculations {
     { name: "Результат 2025 (база)", value: f.result_production },
     { name: "Δ Цена молока",         value: (avg_price_milk_2026 - f.price_milk) * total_volume_kg },
     { name: "Δ Объём молока",        value: (total_volume_kg - f.volume_kg) * (f.price_milk - f.cost_milk) },
-    { name: "Δ СС молока",           value: -(cost_milk_2026 - f.cost_milk) * total_volume_kg },
+    { name: "Δ СС молока",           value: -(cost_milk_total - f.cost_milk * total_volume_kg) },
     { name: "Δ Выручка мяса",        value: revenue_meat_total - f.revenue_meat_total },
     { name: "Δ СС мяса",             value: -(cost_meat_total - f.cost_meat_total) },
     { name: "Δ Субсидии",            value: s.subsidies_2026_total - f.subsidies },
@@ -401,10 +442,14 @@ export function calculate(s: ModelState): Calculations {
   return {
     monthly,
     total_volume_kg,
+    total_production_kg,
     revenue_milk_total,
     fat_premium_total,
     cost_milk_2026,
+    cost_milk_per_kg_realized,
     cost_milk_total,
+    feed_cost_milk_2026_total,
+    fixed_cost_milk_2026_total,
     meatRows,
     revenue_meat_total,
     cost_meat_total,

@@ -7,7 +7,7 @@ export function MonthlyTab() {
   return (
     <div className="space-y-6 animate-fade-in">
       <Section title="Помесячный расчёт — выручка, СС, маржа, результат" accent="monthly"
-        description="Выручка/кг = цена молока + мясо/кг + субсидии/кг + прочие/кг.   СС/кг = СС молока + СС мяса/кг + прочие расх/кг + общехоз. расх/кг.">
+        description="Реализация задана по месяцам; фактический надой = реализация ÷ 97,5%. Кормовые и постоянные затраты распределяются по календарным дням.">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-xs uppercase tracking-wider text-muted-foreground">
@@ -16,6 +16,7 @@ export function MonthlyTab() {
                 <th className="py-2 text-right font-medium">Цена молока</th>
                 <th className="py-2 text-right font-medium">Среднедн.</th>
                 <th className="py-2 text-right font-medium">Объём, кг</th>
+                <th className="py-2 text-right font-medium">Надой, кг</th>
                 <th className="py-2 text-right font-medium">Выр./кг</th>
                 <th className="py-2 text-right font-medium">СС/кг</th>
                 <th className="py-2 text-right font-medium">Маржа/кг</th>
@@ -29,6 +30,7 @@ export function MonthlyTab() {
                   <td className="py-2 text-right">{fmtPerKg(m.price)}</td>
                   <td className="py-2 text-right">{fmtKg(m.daily)}</td>
                   <td className="py-2 text-right">{fmtKg(m.volume)}</td>
+                  <td className="py-2 text-right">{fmtKg(m.production_volume)}</td>
                   <td className="py-2 text-right text-tab-milk">{fmtPerKg(m.revenue_per_kg)}</td>
                   <td className="py-2 text-right text-tab-meat">{fmtPerKg(m.cost_per_kg)}</td>
                   <td className={"py-2 text-right font-medium " + signClass(m.margin_per_kg)}>{fmtPerKg(m.margin_per_kg)}</td>
@@ -40,6 +42,7 @@ export function MonthlyTab() {
                 <td className="py-3 text-right">—</td>
                 <td className="py-3 text-right">—</td>
                 <td className="py-3 text-right">{fmtKg(c.total_volume_kg)}</td>
+                <td className="py-3 text-right">{fmtKg(c.total_production_kg)}</td>
                 <td className="py-3 text-right text-tab-milk">{fmtPerKg(c.avg_revenue_per_kg)}</td>
                 <td className="py-3 text-right text-tab-meat">{fmtPerKg(c.avg_cost_per_kg)}</td>
                 <td className={"py-3 text-right " + signClass(c.avg_revenue_per_kg - c.avg_cost_per_kg)}>{fmtPerKg(c.avg_revenue_per_kg - c.avg_cost_per_kg)}</td>
