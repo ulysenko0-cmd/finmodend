@@ -177,7 +177,7 @@ export default function Index() {
                 key={t.key}
                 onClick={() => setTab(t.key)}
                 className={cn(
-                  "flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition-all duration-200",
+                  "flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35",
                   active
                     ? cn(
                         t.text,

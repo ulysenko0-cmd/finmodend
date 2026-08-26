@@ -2,33 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Финмодель «Русь 2026» — дизайн-система
-   Корпоративный финансовый стиль: глубокий navy + 7 цветов вкладок.
-   Все цвета в HSL.
-*/
+/* Финмодель «Русь 2026» — голубая корпоративная дизайн-система. */
 
 @layer base {
   :root {
-    /* Solar Flare — тёплый editorial с оранжевым/коралл/индиго */
-    --background: 33 100% 96%;
-    --foreground: 240 50% 14%;
+    --background: 208 65% 97%;
+    --foreground: 218 45% 18%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 50% 14%;
+    --card: 210 45% 99%;
+    --card-foreground: 218 45% 18%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 50% 14%;
+    --popover: 210 45% 99%;
+    --popover-foreground: 218 45% 18%;
 
-    --primary: 22 95% 55%;               /* оранжевый */
-    --primary-foreground: 33 100% 98%;
+    --primary: 207 90% 47%;
+    --primary-foreground: 210 100% 99%;
 
-    --secondary: 30 60% 92%;
-    --secondary-foreground: 240 50% 18%;
+    --secondary: 208 55% 92%;
+    --secondary-foreground: 218 45% 22%;
 
-    --muted: 30 50% 94%;
-    --muted-foreground: 240 15% 40%;
+    --muted: 210 45% 94%;
+    --muted-foreground: 215 20% 42%;
 
-    --accent: 245 75% 58%;               /* индиго */
+    --accent: 195 85% 45%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 58%;
@@ -37,50 +33,51 @@
     --success: 158 70% 38%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 95% 55%;
-    --warning-foreground: 240 50% 14%;
+    --warning: 38 92% 52%;
+    --warning-foreground: 218 45% 18%;
 
-    --border: 30 40% 86%;
-    --input: 30 40% 90%;
-    --ring: 22 95% 55%;
+    --border: 209 45% 84%;
+    --input: 210 50% 90%;
+    --ring: 207 90% 47%;
 
     --radius: 0.875rem;
 
-    /* 7 цветов вкладок — Solar Flare */
-    --tab-dashboard: 245 75% 58%;        /* индиго */
-    --tab-dashboard-soft: 245 90% 95%;
-    --tab-milk: 200 85% 50%;             /* небесно-синий */
-    --tab-milk-soft: 200 90% 94%;
-    --tab-meat: 0 84% 60%;               /* красный */
-    --tab-meat-soft: 0 90% 95%;
-    --tab-other: 22 95% 55%;             /* оранжевый */
-    --tab-other-soft: 22 95% 94%;
-    --tab-monthly: 280 70% 55%;          /* фиолетовый */
-    --tab-monthly-soft: 280 80% 95%;
-    --tab-compare: 330 80% 58%;          /* малиновый */
-    --tab-compare-soft: 330 85% 95%;
-    --tab-logic: 240 20% 40%;            /* графит */
-    --tab-logic-soft: 240 20% 92%;
+    /* Вкладки различаются оттенками единой синей палитры. */
+    --tab-dashboard: 216 86% 55%;
+    --tab-dashboard-soft: 216 90% 96%;
+    --tab-milk: 198 88% 44%;
+    --tab-milk-soft: 198 88% 95%;
+    --tab-meat: 224 75% 57%;
+    --tab-meat-soft: 224 82% 96%;
+    --tab-other: 190 82% 38%;
+    --tab-other-soft: 190 78% 95%;
+    --tab-monthly: 205 75% 45%;
+    --tab-monthly-soft: 205 82% 95%;
+    --tab-compare: 232 68% 58%;
+    --tab-compare-soft: 232 78% 96%;
+    --tab-logic: 211 35% 39%;
+    --tab-logic-soft: 211 45% 94%;
+    --tab-invest: 190 82% 38%;
+    --tab-breakeven: 198 88% 44%;
 
     /* Финансовые сигналы */
     --positive: 158 70% 40%;
     --negative: 0 84% 58%;
 
-    /* Solar Flare gradients & glow */
-    --gradient-aurora: linear-gradient(135deg, hsl(22 95% 55%), hsl(0 84% 60%), hsl(245 75% 58%));
-    --gradient-surface: linear-gradient(135deg, hsl(0 0% 100% / 0.95), hsl(33 100% 98% / 0.85));
-    --glow-mint: 0 0 32px hsl(22 95% 55% / 0.30);
-    --glow-lavender: 0 0 32px hsl(245 75% 58% / 0.30);
-    --shadow-glass: 0 10px 30px -10px hsl(22 60% 30% / 0.18), 0 4px 12px -4px hsl(240 30% 20% / 0.08);
+    --gradient-aurora: linear-gradient(135deg, hsl(218 86% 54%), hsl(203 88% 46%), hsl(188 82% 42%));
+    --gradient-surface: linear-gradient(135deg, hsl(210 60% 100% / 0.96), hsl(205 75% 97% / 0.88));
+    --glow-mint: 0 0 32px hsl(195 85% 45% / 0.24);
+    --glow-lavender: 0 0 32px hsl(218 86% 55% / 0.24);
+    --shadow-glass: 0 12px 34px -12px hsl(210 70% 35% / 0.20), 0 4px 12px -4px hsl(218 45% 20% / 0.08);
 
-    --sidebar-background: 240 50% 14%;
-    --sidebar-foreground: 33 50% 92%;
-    --sidebar-primary: 22 95% 55%;
+    --sidebar-background: 218 50% 16%;
+    --sidebar-foreground: 208 55% 94%;
+    --sidebar-primary: 203 88% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 40% 22%;
-    --sidebar-accent-foreground: 33 50% 95%;
-    --sidebar-border: 240 30% 28%;
-    --sidebar-ring: 22 95% 55%;
+    --sidebar-accent: 216 42% 24%;
+    --sidebar-accent-foreground: 208 55% 96%;
+    --sidebar-border: 214 35% 30%;
+    --sidebar-ring: 203 88% 50%;
   }
 
   .dark {
@@ -116,9 +113,9 @@
     font-family: 'Fira Sans', system-ui, -apple-system, sans-serif;
     background-color: hsl(var(--background));
     background-image:
-      radial-gradient(ellipse 75% 50% at 10% 0%, hsl(22 95% 60% / 0.28), transparent 60%),
-      radial-gradient(ellipse 65% 45% at 90% 5%, hsl(0 84% 65% / 0.22), transparent 60%),
-      radial-gradient(ellipse 70% 50% at 50% 100%, hsl(245 75% 60% / 0.18), transparent 65%);
+      radial-gradient(ellipse 75% 50% at 8% 0%, hsl(198 90% 67% / 0.26), transparent 60%),
+      radial-gradient(ellipse 65% 45% at 92% 4%, hsl(220 88% 72% / 0.20), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 50% 100%, hsl(188 82% 62% / 0.16), transparent 65%);
     background-attachment: fixed;
     min-height: 100vh;
   }
@@ -139,17 +136,17 @@
 
 @layer components {
   .glass {
-    background: linear-gradient(135deg, hsl(0 0% 100% / 0.92), hsl(33 100% 98% / 0.80));
+    background: linear-gradient(135deg, hsl(210 60% 100% / 0.94), hsl(205 75% 97% / 0.84));
     backdrop-filter: blur(14px) saturate(140%);
     -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid hsl(30 40% 80% / 0.50);
+    border: 1px solid hsl(207 55% 78% / 0.55);
     box-shadow: var(--shadow-glass);
   }
   .glass-strong {
-    background: linear-gradient(135deg, hsl(0 0% 100% / 0.96), hsl(33 100% 98% / 0.90));
+    background: linear-gradient(135deg, hsl(210 60% 100% / 0.97), hsl(205 75% 97% / 0.92));
     backdrop-filter: blur(20px) saturate(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%);
-    border: 1px solid hsl(30 40% 78% / 0.55);
+    border: 1px solid hsl(207 55% 76% / 0.62);
     box-shadow: var(--shadow-glass);
   }
   .glow-mint { box-shadow: var(--glow-mint); }
@@ -159,6 +156,6 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    font-style: italic;
+    font-style: normal;
   }
 }
