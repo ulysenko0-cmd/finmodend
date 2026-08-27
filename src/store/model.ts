@@ -317,8 +317,8 @@ export function calculate(s: ModelState): Calculations {
   const fat_premium_total = monthlyBase.reduce((a, m) => a + m.fat_premium * m.volume, 0);
 
   // СС молока: корма на 100% зависят от поголовья, остальные затраты постоянны.
-  // При постоянном стаде обе годовые суммы распределяются по календарным дням,
-  // а удой влияет на себестоимость 1 кг через знаменатель.
+  // При постоянном стаде годовая СС 1 кг рассчитывается один раз по годовому надою.
+  // Помесячные затраты распределяются пропорционально фактическому надою месяца.
   const herdFactor = BASE_MILK_HERD_2025 > 0 ? s.milk_herd_heads / BASE_MILK_HERD_2025 : 0;
   const feed_cost_milk_2026_total = s.feed_cost_milk_2025_total * s.cost_milk_coeff * herdFactor;
   const fixed_cost_milk_2026_total = s.fixed_cost_milk_2025_total * s.cost_milk_coeff;
@@ -373,9 +373,9 @@ export function calculate(s: ModelState): Calculations {
 
   // Помесячный расчёт — выручка/СС на 1 кг (мясо, субсидии, прочие — константы /кг)
   const monthly: MonthlyCalc[] = monthlyBase.map((m) => {
-    const calendarShare = m.days / 365;
-    const feed_cost = feed_cost_milk_2026_total * calendarShare;
-    const fixed_milk_cost = fixed_cost_milk_2026_total * calendarShare;
+    const productionShare = total_production_kg > 0 ? m.production_volume / total_production_kg : 0;
+    const feed_cost = feed_cost_milk_2026_total * productionShare;
+    const fixed_milk_cost = fixed_cost_milk_2026_total * productionShare;
     const milk_cost_total = feed_cost + fixed_milk_cost;
     const milk_cost_per_kg = m.production_volume > 0 ? milk_cost_total / m.production_volume : 0;
     const milk_cost_per_kg_realized = m.volume > 0 ? milk_cost_total / m.volume : 0;

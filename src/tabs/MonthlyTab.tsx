@@ -7,7 +7,7 @@ export function MonthlyTab() {
   return (
     <div className="space-y-6 animate-fade-in">
       <Section title="Помесячный расчёт — выручка, СС, маржа, результат" accent="monthly"
-        description="Реализация задана по месяцам; фактический надой = реализация ÷ 97,5%. Кормовые и постоянные затраты распределяются по календарным дням.">
+        description="Реализация задана по месяцам; фактический надой = реализация ÷ 97,5%. Себестоимость месяца = годовая СС 1 кг × фактический надой месяца.">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-xs uppercase tracking-wider text-muted-foreground">

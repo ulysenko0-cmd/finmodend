@@ -48,6 +48,22 @@ describe("milk cost calculation", () => {
     expect(lowerYield.cost_milk_2026).toBeGreaterThan(baseline.cost_milk_2026);
   });
 
+  it("applies the annual unit cost to each month's production volume", () => {
+    const result = calculate(useModel.getState());
+
+    result.monthly.forEach((month) => {
+      expect(month.milk_cost_per_kg).toBeCloseTo(result.cost_milk_2026, 8);
+      expect(month.milk_cost_total).toBeCloseTo(
+        result.cost_milk_2026 * month.production_volume,
+        2,
+      );
+    });
+    expect(result.monthly.reduce((sum, month) => sum + month.milk_cost_total, 0)).toBeCloseTo(
+      result.cost_milk_total,
+      2,
+    );
+  });
+
   it("keeps the 2025-to-2026 factor bridge reconciled", () => {
     const result = calculate(useModel.getState());
     const factorTotal = result.factors.reduce((sum, factor) => sum + factor.value, 0);
