@@ -78,7 +78,7 @@ export function MilkTab() {
       </Section>
 
       <Section title="Параметры себестоимости молока" accent="milk"
-        description="База 2025 взята с листа «Молоко СС»: корма — переменная часть по поголовью; все остальные статьи — постоянная часть.">
+        description="База — 2025 год: корма — переменная часть по поголовью; все остальные статьи — постоянная часть.">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <NumberField label="Товарность, %" value={s.milk_marketability_pct} onChange={(v) => s.setField("milk_marketability_pct", v)} step={0.1} suffix="%"/>
           <NumberField label="Поголовье, голов" value={s.milk_herd_heads} onChange={(v) => s.setField("milk_herd_heads", v)} step={1} suffix="гол"/>
