@@ -84,7 +84,7 @@ export function MilkTab() {
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
           <CostCard label="Корма 2026" value={c.feed_cost_milk_2026_total} note={`${fmtRub(c.feed_cost_milk_2026_total / Math.max(s.milk_herd_heads, 1))} ₽/гол/год`}/>
           <CostCard label="Постоянные расходы 2026" value={c.fixed_cost_milk_2026_total} note="не зависят от надоя и поголовья"/>
-          <CostCard label="СС реализованного молока" value={c.cost_milk_total} note={`${fmtPerKg(c.cost_milk_2026)} ₽/кг надоенного молока × реализация`} strong/>
+          <CostCard label="СС произведённого молока" value={c.feed_cost_milk_2026_total + c.fixed_cost_milk_2026_total} note={`${fmtPerKg(c.cost_milk_2026)} ₽/кг фактического надоя`} strong/>
         </div>
       </Section>
     </div>
