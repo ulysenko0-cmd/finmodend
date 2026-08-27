@@ -15,11 +15,11 @@ export function MilkTab() {
         <KpiCard title="Реализация молока" value={fmtKg(c.total_volume_kg) + " кг"} subtitle={`Товарность ${fmtPerKg(s.milk_marketability_pct)}%`} icon={<Calendar size={26}/>} accent="milk"/>
         <KpiCard title="Фактический надой" value={fmtKg(c.total_production_kg) + " кг"} subtitle={`${fmtKg(s.milk_herd_heads)} голов`} icon={<Users size={26}/>} accent="milk"/>
         <KpiCard title="Выручка молока" value={fmtMln(c.revenue_milk_total)} subtitle={`в т.ч. надбавка за жир: ${fmtMln(c.fat_premium_total)}`} icon={<Coins size={26}/>} accent="milk"/>
-        <KpiCard title="СС молока 2026" value={fmtMln(c.cost_milk_total)} subtitle={`${fmtPerKg(c.cost_milk_2026)} ₽/кг фактического надоя`} icon={<Milk size={26}/>} accent="milk"/>
+        <KpiCard title="СС 1 кг молока" value={`${fmtPerKg(c.cost_milk_2026)} ₽/кг`} subtitle={`Общие затраты: ${fmtMln(c.cost_milk_total)}`} icon={<Milk size={26}/>} accent="milk"/>
       </div>
 
-      <Section title="Цена, реализация и фактический надой" accent="milk"
-        description="Фактический надой = реализация ÷ товарность. Корма зависят от поголовья; остальные расходы постоянны и распределяются по календарным дням.">
+      <Section title="Цена и реализация молока" accent="milk"
+        description="Результат = выручка от реализованного молока − полная себестоимость молока. Фактический надой используется только для расчёта СС 1 кг.">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-xs uppercase tracking-wider text-muted-foreground">
@@ -32,8 +32,6 @@ export function MilkTab() {
                 <th className="py-2 text-center font-medium w-36">Реализация, кг/день</th>
                 <th className="py-2 text-right font-medium">Дней</th>
                 <th className="py-2 text-right font-medium">Реализация, кг</th>
-                <th className="py-2 text-right font-medium">Надой, кг</th>
-                <th className="py-2 text-right font-medium">СС, ₽/кг надоя</th>
                 <th className="py-2 text-right font-medium">Выручка, ₽</th>
                 <th className="py-2 text-right font-medium">СС молока, ₽</th>
                 <th className="py-2 text-right font-medium">Результат, ₽</th>
@@ -53,8 +51,6 @@ export function MilkTab() {
                     <td className="py-1.5 px-2"><NumberField value={s.daily_volume_m[i]} onChange={(x) => s.setDailyVolume(i, x)} step={100} suffix="кг"/></td>
                     <td className="py-1.5 text-right text-muted-foreground">{DAYS_IN_MONTH[i]}</td>
                     <td className="py-1.5 text-right">{fmtKg(mc.volume)}</td>
-                    <td className="py-1.5 text-right font-medium">{fmtKg(mc.production_volume)}</td>
-                    <td className="py-1.5 text-right text-tab-milk font-medium">{fmtPerKg(mc.milk_cost_per_kg)}</td>
                     <td className="py-1.5 text-right font-medium">{fmtRub(mc.revenue_milk)}</td>
                     <td className="py-1.5 text-right">{fmtRub(mc.milk_cost_total)}</td>
                     <td className={`py-1.5 text-right font-medium ${resultMilk >= 0 ? "text-emerald-600" : "text-rose-600"}`}>{fmtRub(resultMilk)}</td>
@@ -66,8 +62,6 @@ export function MilkTab() {
                 <td className="py-3 text-right text-emerald-600">+{fmtRub(c.fat_premium_total)}</td>
                 <td className="py-3 text-right" colSpan={3}>—</td>
                 <td className="py-3 text-right">{fmtKg(c.total_volume_kg)}</td>
-                <td className="py-3 text-right">{fmtKg(c.total_production_kg)}</td>
-                <td className="py-3 text-right text-tab-milk">{fmtPerKg(c.cost_milk_2026)}</td>
                 <td className="py-3 text-right">{fmtRub(c.revenue_milk_total)}</td>
                 <td className="py-3 text-right">{fmtRub(c.cost_milk_total)}</td>
                 <td className={`py-3 text-right ${c.revenue_milk_total - c.cost_milk_total >= 0 ? "text-emerald-600" : "text-rose-600"}`}>{fmtRub(c.revenue_milk_total - c.cost_milk_total)}</td>
