@@ -14,7 +14,7 @@ export function CompareTab() {
     { name: "Выручка мяса (всего), ₽", a: f.revenue_meat_total, b: c.revenue_meat_total },
     { name: "Субсидии, ₽", a: f.subsidies, b: s.subsidies_2026_total },
     { name: "Прочие доходы, ₽", a: f.other_revenue, b: c.other_revenue_total },
-    { name: "СС молока (всего), ₽", a: f.cost_milk_total, b: c.cost_milk_total },
+    { name: "СС реализованного молока, ₽", a: f.cost_milk_total, b: c.cost_milk_total },
     { name: "СС мяса (всего), ₽", a: f.cost_meat_total, b: c.cost_meat_total },
     { name: "Прочие + общехозяйственные расходы, ₽", a: f.other_costs_total, b: c.total_other_costs_money },
     { name: "Результат производства, ₽", a: f.result_production, b: c.result_production, bold: true },

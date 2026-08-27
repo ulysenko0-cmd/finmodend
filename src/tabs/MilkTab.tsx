@@ -15,11 +15,11 @@ export function MilkTab() {
         <KpiCard title="Реализация молока" value={fmtKg(c.total_volume_kg) + " кг"} subtitle={`Товарность ${fmtPerKg(s.milk_marketability_pct)}%`} icon={<Calendar size={26}/>} accent="milk"/>
         <KpiCard title="Фактический надой" value={fmtKg(c.total_production_kg) + " кг"} subtitle={`${fmtKg(s.milk_herd_heads)} голов`} icon={<Users size={26}/>} accent="milk"/>
         <KpiCard title="Выручка молока" value={fmtMln(c.revenue_milk_total)} subtitle={`в т.ч. надбавка за жир: ${fmtMln(c.fat_premium_total)}`} icon={<Coins size={26}/>} accent="milk"/>
-        <KpiCard title="СС 1 кг молока" value={`${fmtPerKg(c.cost_milk_2026)} ₽/кг`} subtitle={`Общие затраты: ${fmtMln(c.cost_milk_total)}`} icon={<Milk size={26}/>} accent="milk"/>
+        <KpiCard title="СС 1 кг надоенного молока" value={`${fmtPerKg(c.cost_milk_2026)} ₽/кг`} subtitle={`СС реализации: ${fmtMln(c.cost_milk_total)}`} icon={<Milk size={26}/>} accent="milk"/>
       </div>
 
       <Section title="Цена и реализация молока" accent="milk"
-        description="Результат = выручка от реализованного молока − полная себестоимость молока. Фактический надой используется только для расчёта СС 1 кг.">
+        description="Результат = выручка от реализации − (СС 1 кг надоенного молока × реализованный объём).">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-xs uppercase tracking-wider text-muted-foreground">
@@ -33,7 +33,7 @@ export function MilkTab() {
                 <th className="py-2 text-right font-medium">Дней</th>
                 <th className="py-2 text-right font-medium">Реализация, кг</th>
                 <th className="py-2 text-right font-medium">Выручка, ₽</th>
-                <th className="py-2 text-right font-medium">СС молока, ₽</th>
+                <th className="py-2 text-right font-medium">СС реализации, ₽</th>
                 <th className="py-2 text-right font-medium">Результат, ₽</th>
               </tr>
             </thead>
@@ -84,7 +84,7 @@ export function MilkTab() {
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
           <CostCard label="Корма 2026" value={c.feed_cost_milk_2026_total} note={`${fmtRub(c.feed_cost_milk_2026_total / Math.max(s.milk_herd_heads, 1))} ₽/гол/год`}/>
           <CostCard label="Постоянные расходы 2026" value={c.fixed_cost_milk_2026_total} note="не зависят от надоя и поголовья"/>
-          <CostCard label="СС молока 2026" value={c.cost_milk_total} note={`${fmtPerKg(c.cost_milk_2026)} ₽/кг фактического надоя`} strong/>
+          <CostCard label="СС реализованного молока" value={c.cost_milk_total} note={`${fmtPerKg(c.cost_milk_2026)} ₽/кг надоенного молока × реализация`} strong/>
         </div>
       </Section>
     </div>
