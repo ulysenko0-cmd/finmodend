@@ -65,9 +65,19 @@ describe("milk cost calculation", () => {
 
     expect(result.feed_cost_milk_2026_total).toBeCloseTo(757_023_120.88, 2);
     expect(result.fixed_cost_milk_2026_total).toBeCloseTo(750_260_487.97, 2);
-    expect(result.cost_milk_2026).toBeCloseTo(41.0085547003, 8);
+    expect(result.cost_milk_2026).toBeCloseTo(40.8450489581, 8);
     expect(result.cost_milk_total).toBeCloseTo(1_469_601_518.63, 2);
-    expect(result.revenue_milk_total - result.cost_milk_total).toBeCloseTo(-148_055_539.95, 2);
+    expect(result.revenue_milk_total - result.cost_milk_total).toBeCloseTo(-142_060_835.47, 2);
+  });
+
+  it("uses the updated August milk volume and price including the fat premium", () => {
+    const result = calculate(useModel.getState());
+    const august = result.monthly[7];
+
+    expect(august.volume).toBeCloseTo(3_131_856, 2);
+    expect(august.fat).toBeCloseTo(3.765, 6);
+    expect(august.fat_premium).toBeCloseTo(0.33, 8);
+    expect(august.effective_price).toBeCloseTo(35.33, 8);
   });
 
   it("applies the annual production unit cost to each month's realized volume", () => {
