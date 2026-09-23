@@ -76,7 +76,7 @@ export function MilkTab() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <NumberField label="Товарность, %" value={s.milk_marketability_pct} onChange={(v) => s.setField("milk_marketability_pct", v)} step={0.1} suffix="%"/>
           <NumberField label="Поголовье, голов" value={s.milk_herd_heads} onChange={(v) => s.setField("milk_herd_heads", v)} step={1} suffix="гол"/>
-          <NumberField label="Средний надой, кг/гол./год" value={s.milk_yield_per_head} onChange={(v) => s.setField("milk_yield_per_head", v)} step={10} suffix="кг"/>
+          <NumberField label="Средний надой, кг/гол./год" value={s.milk_yield_per_head} onChange={(v) => s.setField("milk_yield_per_head", v)} step={10} decimals={2} suffix="кг"/>
           <NumberField label="Коэф. инфляции" value={s.cost_milk_coeff} onChange={(v) => s.setField("cost_milk_coeff", v)} step={0.01}/>
           <NumberField label="Корма 2025, ₽/год" value={s.feed_cost_milk_2025_total} onChange={(v) => s.setField("feed_cost_milk_2025_total", v)} step={1_000_000} suffix="₽"/>
           <NumberField label="Постоянные расходы 2025, ₽/год" value={s.fixed_cost_milk_2025_total} onChange={(v) => s.setField("fixed_cost_milk_2025_total", v)} step={1_000_000} suffix="₽"/>
