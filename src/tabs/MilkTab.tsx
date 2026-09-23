@@ -48,7 +48,7 @@ export function MilkTab() {
                     <td className="py-1.5 px-2"><NumberField value={s.fat_m[i]} onChange={(x) => s.setFat(i, x)} step={0.1} suffix="%"/></td>
                     <td className="py-1.5 text-right text-emerald-600 font-medium">{mc.fat_premium > 0 ? `+${mc.fat_premium.toFixed(2)}` : "—"}</td>
                     <td className="py-1.5 text-right font-semibold">{mc.effective_price.toFixed(2)}</td>
-                    <td className="py-1.5 px-2"><NumberField value={s.daily_volume_m[i]} onChange={(x) => s.setDailyVolume(i, x)} step={100} suffix="кг"/></td>
+                    <td className="py-1.5 text-right">{fmtKg(mc.daily)}</td>
                     <td className="py-1.5 text-right text-muted-foreground">{DAYS_IN_MONTH[i]}</td>
                     <td className="py-1.5 text-right">{fmtKg(mc.volume)}</td>
                     <td className="py-1.5 text-right font-medium">{fmtRub(mc.revenue_milk)}</td>
@@ -72,17 +72,18 @@ export function MilkTab() {
       </Section>
 
       <Section title="Параметры себестоимости молока" accent="milk"
-        description="База — 2025 год: корма — переменная часть по поголовью; все остальные статьи — постоянная часть.">
+        description="Производство = поголовье × надой на голову. Корма и постоянные расходы 2025 индексируются как годовые суммы и распределяются на произведённое молоко.">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <NumberField label="Товарность, %" value={s.milk_marketability_pct} onChange={(v) => s.setField("milk_marketability_pct", v)} step={0.1} suffix="%"/>
           <NumberField label="Поголовье, голов" value={s.milk_herd_heads} onChange={(v) => s.setField("milk_herd_heads", v)} step={1} suffix="гол"/>
+          <NumberField label="Средний надой, кг/гол./год" value={s.milk_yield_per_head} onChange={(v) => s.setField("milk_yield_per_head", v)} step={10} suffix="кг"/>
           <NumberField label="Коэф. инфляции" value={s.cost_milk_coeff} onChange={(v) => s.setField("cost_milk_coeff", v)} step={0.01}/>
           <NumberField label="Корма 2025, ₽/год" value={s.feed_cost_milk_2025_total} onChange={(v) => s.setField("feed_cost_milk_2025_total", v)} step={1_000_000} suffix="₽"/>
           <NumberField label="Постоянные расходы 2025, ₽/год" value={s.fixed_cost_milk_2025_total} onChange={(v) => s.setField("fixed_cost_milk_2025_total", v)} step={1_000_000} suffix="₽"/>
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <CostCard label="Корма 2026" value={c.feed_cost_milk_2026_total} note={`${fmtRub(c.feed_cost_milk_2026_total / Math.max(s.milk_herd_heads, 1))} ₽/гол/год`}/>
+          <CostCard label="Корма 2026" value={c.feed_cost_milk_2026_total} note={`${fmtPerKg(c.feed_cost_milk_2026_total / Math.max(c.total_production_kg, 1))} ₽/кг произведённого молока`}/>
           <CostCard label="Постоянные расходы 2026" value={c.fixed_cost_milk_2026_total} note="не зависят от надоя и поголовья"/>
           <CostCard label="СС произведённого молока" value={c.feed_cost_milk_2026_total + c.fixed_cost_milk_2026_total} note={`${fmtPerKg(c.cost_milk_2026)} ₽/кг фактического надоя`} strong/>
         </div>

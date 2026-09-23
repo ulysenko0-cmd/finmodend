@@ -42,7 +42,8 @@ export interface ModelState {
   // СС молока
   milk_marketability_pct: number;       // товарность: реализация / надой, %
   milk_herd_heads: number;              // постоянное среднегодовое поголовье
-  feed_cost_milk_2025_total: number;    // корма — переменная часть, ₽/год
+  milk_yield_per_head: number;          // средний надой, кг/гол./год
+  feed_cost_milk_2025_total: number;    // корма 2025, ₽/год
   fixed_cost_milk_2025_total: number;   // остальные затраты — постоянная часть, ₽/год
   cost_milk_coeff: number;
 
@@ -133,8 +134,6 @@ const DEFAULT_MEAT: Record<MeatKey, MeatRow> = {
 };
 
 const DEFAULT_FAT = [4.12, 3.97, 3.90, 3.95, 3.77, 3.81, 3.5, 3.61, 3.56, 3.73, 3.83, 4.02];
-const BASE_MILK_HERD_2025 = 3_689;
-
 const DEFAULT_STATE = {
   price_milk_m: [...DEFAULT_PRICE_MILK],
   daily_volume_m: [...DEFAULT_DAILY_VOLUME],
@@ -143,8 +142,9 @@ const DEFAULT_STATE = {
   fat_premium_per_pct: 2.0,
   milk_marketability_pct: 97.5,
   milk_herd_heads: 3_689,
+  milk_yield_per_head: 9_963.498455421874,
   feed_cost_milk_2025_total: 710_819_831.81,
-  fixed_cost_milk_2025_total: 728_079_666.76,
+  fixed_cost_milk_2025_total: 704_469_941.76,
   cost_milk_coeff: 1.065,
   meat: structuredClone(DEFAULT_MEAT),
   revenue_meat_coeff: 1.05,
@@ -296,30 +296,32 @@ export interface Calculations {
 }
 
 export function calculate(s: ModelState): Calculations {
-  // Помесячно — реализация, фактический надой и надбавка за жир.
-  // Товарность = реализация / надой.
+  // Производство = поголовье × надой на голову. Реализация = производство × товарность.
+  // Помесячные значения daily_volume_m задают сезонный профиль, а не годовой объём.
   const marketability = Math.max(0, Math.min(1, s.milk_marketability_pct / 100));
+  const total_production_kg = Math.max(0, s.milk_herd_heads) * Math.max(0, s.milk_yield_per_head);
+  const total_volume_kg = total_production_kg * marketability;
+  const seasonalWeights = s.daily_volume_m.map((daily, i) => Math.max(0, daily) * DAYS_IN_MONTH[i]);
+  const totalSeasonalWeight = seasonalWeights.reduce((sum, value) => sum + value, 0);
   const monthlyBase = s.price_milk_m.map((price, i) => {
     const days = DAYS_IN_MONTH[i];
-    const daily = s.daily_volume_m[i];
-    const volume = daily * days;
-    const production_volume = marketability > 0 ? volume / marketability : 0;
+    const seasonalShare = totalSeasonalWeight > 0 ? seasonalWeights[i] / totalSeasonalWeight : 1 / 12;
+    const production_volume = total_production_kg * seasonalShare;
+    const volume = total_volume_kg * seasonalShare;
+    const daily = days > 0 ? volume / days : 0;
     const fat = s.fat_m[i];
     const fat_premium = Math.max(0, (fat - s.fat_base) * s.fat_premium_per_pct);
     const effective_price = price + fat_premium;
     const revenue_milk = effective_price * volume;
     return { i, price, fat, fat_premium, effective_price, daily, days, volume, production_volume, revenue_milk };
   });
-  const total_volume_kg = monthlyBase.reduce((a, m) => a + m.volume, 0);
-  const total_production_kg = monthlyBase.reduce((a, m) => a + m.production_volume, 0);
   const revenue_milk_total = monthlyBase.reduce((a, m) => a + m.revenue_milk, 0);
   const fat_premium_total = monthlyBase.reduce((a, m) => a + m.fat_premium * m.volume, 0);
 
-  // СС молока: корма на 100% зависят от поголовья, остальные затраты постоянны.
-  // Годовая СС 1 кг рассчитывается один раз по годовому надою.
+  // СС молока: корма 2025 и постоянные расходы индексируются как годовые суммы.
+  // Годовая СС 1 кг рассчитывается один раз по годовому надою расчётного года.
   // В результат входит себестоимость реализованного молока: СС 1 кг × реализация.
-  const herdFactor = BASE_MILK_HERD_2025 > 0 ? s.milk_herd_heads / BASE_MILK_HERD_2025 : 0;
-  const feed_cost_milk_2026_total = s.feed_cost_milk_2025_total * s.cost_milk_coeff * herdFactor;
+  const feed_cost_milk_2026_total = s.feed_cost_milk_2025_total * s.cost_milk_coeff;
   const fixed_cost_milk_2026_total = s.fixed_cost_milk_2025_total * s.cost_milk_coeff;
   const cost_milk_production_total = feed_cost_milk_2026_total + fixed_cost_milk_2026_total;
   const cost_milk_2026 = total_production_kg > 0 ? cost_milk_production_total / total_production_kg : 0;
